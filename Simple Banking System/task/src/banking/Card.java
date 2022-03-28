@@ -1,161 +1,89 @@
 package banking;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
 
 public class Card {
 
-    Scanner scanner = new Scanner(System.in);
+    private final String cardNumber;
+    private final String pin;
+    private final int balance;
 
-    Random random = new Random();
+    protected Card() {
 
-    private String cardNumber;
-    private String cardPin;
-    private List<String> cardList = new ArrayList<String>();
+        Random random = new Random();
 
-    public String getNewCardNumber() {
-        return cardNumber;
-    }
+        String tempNumber = "400000" + (random.nextInt(899) + 100) +
+                (random.nextInt(899) + 100) + (random.nextInt(899) + 100);
 
-    public String getNewCardPin() {
-        return cardPin;
-    }
+        // Applying Luhn Algorithm to generate the checksum
 
-    public String newCardNumber(String cardNumber) {
-
-        String bin = "400000";
-
-        int lowAccNumber = 100000;
-        int hiAccNumber = 999999;
-        int accNumber = random.nextInt(hiAccNumber - lowAccNumber + 1) + lowAccNumber;
-
-        int lowCheckSum = 1000;
-        int hiCheckSum = 9999;
-        int checkSum = random.nextInt(hiCheckSum - lowCheckSum + 1) + lowCheckSum;
-
-        cardNumber = bin + String.valueOf(accNumber) + String.valueOf(checkSum);
-
-        return cardNumber;
-    }
-
-    public String newCardPin(String cardPin) {
-
-        int low = 1000;
-        int hi = 9999;
-        cardPin = String.valueOf(random.nextInt(hi - low + 1) + low);
-
-        return cardPin;
-    }
-
-    public void cardList(String cardNumber, String cardPin) {
-
-        cardList.add(cardNumber);
-        cardList.add(cardPin);
-    }
-
-    public static boolean luhnCheck(String cardNumber) {
-
+        long numberCheck = Long.parseLong(tempNumber);
         int sum = 0;
+        int checksum = 0;
+        long tempSum;
+        long adder = 0;
+        boolean odd = true;
 
-        boolean alternate = false;
+        while (numberCheck > 0) {
 
-        for (int i = cardNumber.length() - 1; i >= 0; i--) {
+            if (odd) {
+                tempSum = (numberCheck % 10) * 2;
 
-            int n = Integer.parseInt(cardNumber.substring(i, i + 1));
+                if (tempSum > 9) {
+                    while (tempSum > 0) {
+                        adder += tempSum % 10;
+                        tempSum /= 10;
+                    }
 
-            if (alternate) {
-                n *= 2;
-
-                if (n > 9) {
-                    n = (n % 10) + 1;
+                    tempSum = adder;
                 }
-            }
 
-            sum += n;
-
-            alternate = !alternate;
-        }
-        return (sum % 10 == 0);
-    }
-
-
-    public void pinCheck() {
-
-        System.out.println("Enter your card number:");
-        String cardNumberCheck = scanner.next();
-        
-        System.out.println("Enter your PIN:");
-        String pinNumberCheck = scanner.next();
-
-        for (String number : cardList) {
-
-            if (number.equals(cardNumberCheck) && cardList.get(cardList.indexOf(number) + 1).equals(pinNumberCheck)) {
-                System.out.println("You have successfully logged in!");
-                accountMenu();
+                odd = false;
 
             } else {
-                System.out.println("Wrong card number or PIN!");
+                tempSum = numberCheck % 10;
+                odd = true;
             }
+
+            adder = 0;
+            sum += tempSum;
+            numberCheck /= 10;
         }
+
+        while (sum % 10 != 0) {
+            sum++;
+            checksum++;
+        }
+
+        cardNumber = tempNumber + checksum;
+
+        int tempPin = random.nextInt(9999);
+
+        if (tempPin <= 999 && tempPin >= 100) {
+            pin = "0" + tempPin;
+
+        } else if (tempPin <= 99 && tempPin >= 10) {
+            pin = "00" + tempPin;
+
+        } else if (tempPin <= 9) {
+            pin = "000" + tempPin;
+
+        } else {
+            pin = "" + tempPin;
+        }
+
+        balance = 0;
     }
 
-    public void accountMenu() {
-
-        String accountMenuSelect = "";
-
-        while (!accountMenuSelect.equals("0")) {
-
-            System.out.println("1. Balance \n" + "2. Log out \n" + "0. Exit");
-
-            accountMenuSelect = scanner.next();
-
-            switch (accountMenuSelect) {
-
-                case "1":
-                    System.out.println("Balance: 0");
-                    break;
-
-                case "2":
-                    System.out.println("You have successfully logged out!");
-                    mainMenu();
-                    break;
-
-                case "0":
-                    System.out.println("Bye!");
-                    break;
-            }
-        }
+    public String getCardNumber() {
+        return cardNumber;
     }
 
-    public void mainMenu() {
+    public String getPin() {
+        return pin;
+    }
 
-        String mainMenuSelect = " ";
-
-        while (!mainMenuSelect.equals("0")) {
-
-            System.out.println("1. Create an account \n" + "2. Log into account \n" + "0. Exit");
-
-            mainMenuSelect = scanner.next();
-
-            if (mainMenuSelect.equals("1")) {
-
-                System.out.println("Your card has been created");
-                cardNumber = newCardNumber(cardNumber);
-
-                System.out.println("Your card number:");
-                System.out.println(getNewCardNumber());
-
-                cardPin = newCardPin(cardPin);
-                System.out.println("Your card PIN:");
-
-                cardList(cardNumber, cardPin);
-                System.out.println(getNewCardPin());
-
-            } else if (mainMenuSelect.equals("2")) {
-                pinCheck();
-            }
-        }
+    public int getBalance() {
+        return balance;
     }
 }
