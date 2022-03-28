@@ -10,7 +10,7 @@ public class CardDaoDB {
 
     private final String fileName;
 
-    protected CardDaoDB(String fileName) {
+    public CardDaoDB(String fileName) {
         this.fileName = fileName;
     }
 
